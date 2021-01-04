@@ -15,6 +15,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
@@ -38,11 +39,10 @@ public class TargetPickCursor extends SimpleApplication {
 
     private final static Box mesh = new Box(Vector3f.ZERO, 1, 1, 1);
     
+    
     public Geometry myCube(String geoName, Vector3f loc, ColorRGBA color) {
         Geometry geom = new Geometry(geoName, mesh ); // 1 1 1
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-//        mat.setTexture("ColorMap",
-//            assetManager.loadTexture("Textures/Terrain/BrickWall/BrickWall.jpg"));
         mat.setColor("Color", color);
         geom.setMaterial(mat);
         geom.setLocalTranslation(loc);
@@ -77,19 +77,21 @@ public class TargetPickCursor extends SimpleApplication {
         // Test multiple listeners per mapping
         inputManager.addListener(actionListener, new String[]{MAPPING_COLOR});
         
-        
+        flyCam.setDragToRotate(true);
+        inputManager.setCursorVisible(true);
+        attachCenterMark(); // Show screen center
+
 
         rootNode.attachChild( myCube("Blue Box", new Vector3f(1, 1, 1), ColorRGBA.Blue) );
         rootNode.attachChild( myCube("Red Box", new Vector3f(3, 3, 3), ColorRGBA.Red) );
         
-        attachCenterMark(); // Show screen center
         
     }
 
     private void attachCenterMark() {
         Geometry c = myCube("center center", Vector3f.ZERO, ColorRGBA.White);
-        c.scale(3);
-        c.setLocalTranslation( settings.getWidth() / 2, settings.getHeight() / 2, 0);
+            c.scale(1);
+            c.setLocalTranslation( settings.getWidth() / 2, settings.getHeight() / 2, 0);
         guiNode.attachChild(c);
     }
 
@@ -102,26 +104,26 @@ public class TargetPickCursor extends SimpleApplication {
             }
         }
     };
+    
     private AnalogListener analogListener = new AnalogListener() {
-//        @Override
-//        public void onAnalog(String name, float intensity, float tpf) {
-//            if ( name.equals(MAPPING_ROTATE) ) {
-//                System.out.println("You triggered: " +name + " = " + intensity);
-////                geom.rotate(0, intensity, 0);
-//            }
-//        }
         public void onAnalog(String name, float intensity, float tpf)
         {
             if ( name.equals(MAPPING_ROTATE) ) {
                 CollisionResults results = new CollisionResults();
-                Ray ray = new Ray( cam.getLocation(), cam.getDirection() );
+                Vector2f click2d = inputManager.getCursorPosition();
+                Vector3f click3d = cam.getWorldCoordinates( new Vector2f(click2d.getX(), click2d.getY()), 0f );
+                Vector3f dir     = cam.getWorldCoordinates( new Vector2f(click2d.getX(), click2d.getY()), 1f ).subtract(click3d);
+                
+//                Ray ray = new Ray( cam.getLocation(), cam.getDirection() );
+                Ray ray = new Ray( click3d, dir );
+                
                 rootNode.collideWith(ray, results);
-                for ( int i = 0; i < results.size(); i++) {
-                    float    dist   = results.getCollision(i).getDistance();
-                    Vector3f pt     = results.getCollision(i).getContactPoint();
-                    String   target = results.getCollision(i).getGeometry().getName();
-                    System.out.println("Selection: #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
-                }
+//                for ( int i = 0; i < results.size(); i++) {
+//                    float    dist   = results.getCollision(i).getDistance();
+//                    Vector3f pt     = results.getCollision(i).getContactPoint();
+//                    String   target = results.getCollision(i).getGeometry().getName();
+//                    System.out.println("Selection: #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+//                }
                 if ( results.size() > 0 ) {
                     Geometry target = results.getClosestCollision().getGeometry();
                     if (target.getName().equals("Red Box")) {
