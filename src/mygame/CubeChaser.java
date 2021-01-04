@@ -100,16 +100,16 @@ public class CubeChaser extends SimpleApplication {
 //        if ( cam.getLocation().distance(scaredCube.getLocalTranslation() ) < 10 ) {
 //            scaredCube.move(cam.getDirection());
 //        }
-        CollisionResults results = new CollisionResults();
-        ray.setOrigin(cam.getLocation() );
-        ray.setDirection(cam.getDirection() );
-        rootNode.collideWith(ray, results);
-        if ( results.size() > 0 ) {
-            Geometry target = results.getClosestCollision().getGeometry();
-            if ( cam.getLocation().distance(target.getLocalTranslation()) < 10 ) {
-                target.move(cam.getDirection());
-            }
-        }
+//        CollisionResults results = new CollisionResults();
+//        ray.setOrigin(cam.getLocation() );
+//        ray.setDirection(cam.getDirection() );
+//        rootNode.collideWith(ray, results);
+//        if ( results.size() > 0 ) {
+//            Geometry target = results.getClosestCollision().getGeometry();
+//            if ( cam.getLocation().distance(target.getLocalTranslation()) < 10 ) {
+//                target.move(cam.getDirection());
+//            }
+//        }
     }
 
     @Override
@@ -125,7 +125,12 @@ public class CubeChaser extends SimpleApplication {
                     FastMath.nextRandomInt(-20, 20),
                     FastMath.nextRandomInt(-20, 20)
             );
-            rootNode.attachChild( myCube("Cube"+i, loc, ColorRGBA.randomColor()) );
+//            rootNode.attachChild( myCube("Cube"+i, loc, ColorRGBA.randomColor()) );
+            Geometry geom = myCube("Cube"+i, loc, ColorRGBA.randomColor() );
+            if ( FastMath.nextRandomInt(1, 4) == 4 ) {
+                geom.addControl( new CubeChaserControl(cam, rootNode) );
+            } 
+            rootNode.attachChild(geom);
         }
     }
 
