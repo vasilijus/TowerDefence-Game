@@ -9,6 +9,6 @@ package mygame;
  *
  * @author sergio
  */
-public class AppState {
+class AbstractStateApp {
     
 }
